@@ -1,2 +1,4 @@
 croniter==0.3.35
+ipdb==0.13.4
 prefect==0.13.9
+pytest==6.1.1
