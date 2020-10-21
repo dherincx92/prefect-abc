@@ -3,7 +3,7 @@ Abstract class to be inherited in order to build
 and run a prefect `flow`
 
 author: Derek Herincx
-last_updated: 10/15/2020
+last_updated: 10/21/2020
 '''
 
 from abc import ABC, abstractmethod
