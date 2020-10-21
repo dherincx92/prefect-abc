@@ -29,7 +29,7 @@ def _validate_build_output(build_method):
   @wraps(build_method)
   def wrapper(*args, **kwargs):
     if not isinstance(build_method(*args, **kwargs), Flow):
-      raise TypeError("You must return a prefect `flow` object!")
+      raise TypeError("You must return a prefect `flow` object from `build`")
     else:
       return build_method(*args, **kwargs)
   return wrapper
