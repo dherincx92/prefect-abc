@@ -5,10 +5,35 @@ and run a prefect `flow`
 author: Derek Herincx
 last_updated: 10/15/2020
 '''
+
 from abc import ABC, abstractmethod
+from functools import wraps
 
 from croniter import croniter
 from prefect import Flow
+
+def _validate_build_output(build_method):
+  """
+  Decorator that validates if the output of the `build` method is a
+  prefect `flow` object. If it is not, a `TypeError` is raised.
+
+  Args:
+    - build_method (Callable): `build` method overwriting `AbstractFlow`
+
+  Returns:
+    - Callable: the decorated `AbstractFlow.build` method
+
+  Raises:
+    - TypeError: if the output of `build` is not a prefect `flow`
+  """
+  @wraps(build_method)
+  def wrapper(*args, **kwargs):
+    if not isinstance(func(*args, **kwargs), Flow):
+      raise TypeError("You must return a prefect `flow` object!")
+    else:
+      return func(*args, **kwargs)
+  return wrapper
+
 
 class AbstractFlow(ABC):
   """
@@ -63,6 +88,16 @@ class AbstractFlow(ABC):
     if cron and not croniter.is_valid(cron):
       raise ValueError(f"Invalid cron string: `{cron}`")
     self.cron = cron
+
+  def __getattribute__(self, name):
+    # prevents recursion error; in Python3, all classes inherit from `object`
+    build_method = object.__getattribute__(self, name)
+
+    # decoration for any user created build method
+    if name == 'build':
+      return _validate_build_output(build_method)
+    else:
+      return build_method
 
   @abstractmethod
   def build(self):
