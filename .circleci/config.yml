@@ -1,0 +1,28 @@
+version: 2.1
+# Define the jobs we want to run for this project
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7.4
+    steps:
+      - checkout
+      - run:
+          name: Setup virtualenv
+          command: python3 -m venv venv && source venv/bin/activate
+      - run:
+          name: Install dependencies
+          command: pip install -e . --user
+      - run:
+          name: Run flake8
+          command: make lint
+      - run:
+          name: Run pylint
+          command: make pylint
+      - run:
+          name: Run pytest
+          command: make test
+# Orchestrate our job run sequence
+workflows:
+  build_and_test:
+    jobs:
+      - build
