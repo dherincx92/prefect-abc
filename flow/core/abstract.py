@@ -81,7 +81,7 @@ class AbstractFlow(ABC):
       )
     # if `AbstractFlow` is inherited by a new `cls` object, proceed...
     else:
-      # cannot have any args since super() references the `type` class
+      # cannot have any args since super() references the `object` class
       return super(AbstractFlow, cls).__new__(cls)
 
   def __init__(self, cron: str = None):
