@@ -3,7 +3,7 @@ Abstract class to be inherited in order to build
 and run a prefect `flow`
 
 author: Derek Herincx
-last_updated: 10/21/2020
+last_updated: 10/22/2020
 '''
 
 from abc import ABC, abstractmethod
@@ -81,23 +81,27 @@ class AbstractFlow(ABC):
       )
     # if `AbstractFlow` is inherited by a new `cls` object, proceed...
     else:
-      return super(AbstractFlow, cls).__new__(cls, *args, **kwargs)
+      # cannot have any args since super() references the `type` class
+      return super(AbstractFlow, cls).__new__(cls)
 
   def __init__(self, cron: str = None):
     # validates if cron is a valid string
     if cron and not croniter.is_valid(cron):
-      raise ValueError(f"Invalid cron string: `{cron}`")
+      raise ValueError(f'''
+        Invalid cron string: `{cron}`. For help, consult `crontab.guru.com`
+        '''
+      )
     self.cron = cron
 
   def __getattribute__(self, name):
     # prevents recursion error; in Python3, all classes inherit from `object`
-    build_method = object.__getattribute__(self, name)
+    method = object.__getattribute__(self, name)
 
     # decoration for any user created build method
     if name == 'build':
-      return _validate_build_output(build_method)
+      return _validate_build_output(method)
     else:
-      return build_method
+      return method
 
   @abstractmethod
   def build(self):
@@ -105,5 +109,5 @@ class AbstractFlow(ABC):
 
   def run(self):
     flow = self.build()
-    self.run()
+    flow.run()
 
