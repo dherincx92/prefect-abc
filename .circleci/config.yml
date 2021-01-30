@@ -11,16 +11,13 @@ jobs:
           command: python3 -m venv venv && source venv/bin/activate
       - run:
           name: Install dependencies
-          command: pip install -e . --user
-      - run:
-          name: Run flake8
-          command: make lint
+          command: pip install -e .
       - run:
           name: Run pylint
-          command: make pylint
+          command: python -m pylint src
       - run:
-          name: Run pytest
-          command: make test
+          name: Run pytest without cache plugin
+          command: python -m pytest src -p no:cacheprovider
 # Orchestrate our job run sequence
 workflows:
   build_and_test:
