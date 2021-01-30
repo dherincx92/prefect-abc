@@ -13,3 +13,44 @@ This repo was inspired by a structure that @mitchbregs used at Gallup. We found 
 
 ## What Matters (to you)
 If you've made it this far, thanks for reading!
+
+So what I've built here is what's called an Abstract Base Class (ABC). Python's `abc` module allows us to use abstract base classes and if you're like me, you're probably wondering what the heck they are. It's simple -- let's say you have an idea for a class and its methods and you want someone to simply come in and fill in the logic for the methods. If you attempt to return `None` from any method within a class of this sorts, you will get an error. Here's where ABC's come in -- if you want to build a class with methods returning `None`, you can have your class inherit from ABC and then wrap all methods that you want the user to fill in with the `@abstractmethod` decorator, which is exactly what the `AbstractFlow` class in this repo does. That's the tweet LOL.
+
+So in me and @mitchbregs' scenario, here's what's happening:
+
+1. We know we need to build a `flow` that automates some sort of task; doesn't matter what the task is - we just want to get something done
+2. We know that the `flow` needs to get built 
+3. We know that the `flow` needs to `run` in order to be executed by Prefect and accomplish our task
+
+Regardless of what we are trying to accomplish, you can see that the only step that really varies with the task is #1 - steps #2 and #3 do not vary because they are not dependent of the task; those are just things that needs to happen because Prefect said so :)
+
+So ignoring the existence of Prefect Cloud, if we wanted to simply insert logic for a task all we would need to do is the following:
+
+
+```python
+
+class SampleFlow(AbstractFlow):
+
+    def build(self):
+        # this `build` overrides the `build` method from `AbstractFlow`
+        sample_task = SampleTask()
+
+        with Flow("sample flow") as flow:
+            task_output = sample_task(some_param)
+
+            (continued flow logic here...)
+
+        return flow
+```
+
+Simply add the logic you want to run in your class' `build` method. In my case, `SampleFlow` has inherited from `AbstractFlow` (the ABC class). Because we are inheriting from `AbstractFlow`, that means we have the `build` and `run` methods available to us. Remember those 1,2,3 steps from above? Remember how I mentioned step #1 is the only one that varies depending on your task? Well in terms of the example above, `build` is the abstract method that we left open for any user. That means that in the class inhering from `AbstractFlow`, you _must_ include the `build` method since it is used by steps #2 and #3 to execute your logic. So where are steps #2 and #3? Those are simply the `run` method...you don't need to worry about those since they are the same, _regardless of the task_.
+
+
+So continuing from the example above, `SampleFlow` accomplishes something (doesn't matter what it is...just make sure it works). To run the flow locally then proceed to do the following:
+
+
+```python
+
+flow = SampleFlow()
+flow.run()
+```
